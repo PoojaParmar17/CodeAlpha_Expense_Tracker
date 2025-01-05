@@ -1,0 +1,84 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Expense Tracker</h1>
+        <div class="input-area">
+            <input type="text" id="description" placeholder="Description">
+            <input type="number" id="amount" placeholder="Amount">
+            <button id="addBtn">Add Expense</button>
+            <!-- Reset Button Added -->
+            <button id="resetBtn">Reset All Expenses</button>
+        </div>
+        <div class="expense-list">
+            <h2>Expenses</h2>
+            <ul id="expenseList"></ul>
+            <p id="total">Total: $0</p>
+        </div>
+    </div>
+    <script>
+    const descriptionInput = document.getElementById('description');
+    const amountInput = document.getElementById('amount');
+    const addBtn = document.getElementById('addBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const expenseList = document.getElementById('expenseList');
+    const totalDisplay = document.getElementById('total');
+
+    let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+    updateUI();
+
+    addBtn.addEventListener('click', () => {
+        const description = descriptionInput.value;
+        const amount = parseFloat(amountInput.value);
+
+        if (description && !isNaN(amount)) {
+            expenses.push({ description, amount });
+            saveExpenses();
+            updateUI();
+            descriptionInput.value = '';
+            amountInput.value = '';
+        } else {
+            alert("Please enter valid description and amount.");
+        }
+    });
+
+    // Reset Button Event
+    resetBtn.addEventListener('click', () => {
+        expenses = [];  // Clear all expenses
+        localStorage.removeItem('expenses');  // Remove from localStorage
+        updateUI();  // Update UI to reflect changes
+    });
+
+    function deleteExpense(index) {
+        expenses.splice(index, 1);
+        saveExpenses();
+        updateUI();
+    }
+
+    function updateUI() {
+        expenseList.innerHTML = '';
+        let total = 0;
+        expenses.forEach((expense, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${expense.description}</span>
+                <span>$${expense.amount.toFixed(2)}</span>
+                <button class="delete-btn" onclick="deleteExpense(${index})">Delete</button>
+            `;
+            expenseList.appendChild(li);
+            total += expense.amount;
+        });
+        totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+    }
+
+    function saveExpenses() {
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+    }
+    </script>
+</body>
+</html>
